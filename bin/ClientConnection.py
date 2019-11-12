@@ -21,18 +21,20 @@ class ClientConnection(threading.Thread):
     USERNAME_PATTERN = re.compile(r'^[a-zA-Z0-9#*-_$]{4,30}$')
     PASSWORD_PATTERN = re.compile(r'^[a-zA-Z0-9#*-_$]{6,30}$')
 
-    def __init__(self, client_socket, server_instance):
+    def __init__(self, client_socket, server_instance, session):
         self._client_socket = client_socket
         self._server_instance = server_instance
-        self._session = {}
+        self._session = session
         threading.Thread.__init__(self)
 
     def _listen_client(self):
 
+        response = None
         try:
             response = self._client_socket.recv(1024)
         except:
             print('error')
+
         return response
 
     def _unpack_chat_packet(self, packet):
@@ -59,8 +61,7 @@ class ClientConnection(threading.Thread):
 
             try:
                 p_type, p_len, payload = self._unpack_chat_packet(packet)
-            except Exception as e:
-                print(e)
+            except:
                 print("Pacchetto non valido")
                 break
 
@@ -104,7 +105,7 @@ class ClientConnection(threading.Thread):
     def _signup(self, payload):
 
         if self._is_logged():
-            return self._error("Sei gi√† loggato. Effettuare il logout prima di registrare un nuovo account.")
+            return self._error("Sei gi‡ loggato. Effettuare il logout prima di registrare un nuovo account.")
 
         username, password = [elem.decode('utf-8')
                               for elem in payload.split(b'\x00')]
@@ -118,15 +119,15 @@ class ClientConnection(threading.Thread):
             self._server_instance.signup(self, username, password)
             self._confirm()
         except self._server_instance.AlreadyUserException:
-            self._error("Questo username esiste gi√†")
+            self._error("Questo username esiste gi‡")
 
     def _signin(self, payload):
 
         if self._is_logged():
-            return self._error("Sei gi√† loggato, impossibile effettuare un altro login.")
+            return self._error("Sei gi‡ loggato, impossibile effettuare un altro login.")
 
         if len(payload) < 2:
-            return self._error("Si √® verificato un errore durante il login.")
+            return self._error("Si Ë verificato un errore durante il login.")
 
         username, password = [elem.decode('utf-8')
                               for elem in payload.split(b'\x00')]
@@ -138,7 +139,7 @@ class ClientConnection(threading.Thread):
         except self._server_instance.UserNotFoundException:
             self._error("L'account non esiste.")
         except self._server_instance.InvalidPasswordException:
-            self._error("La password non √® corretta.")
+            self._error("La password non Ë corretta.")
 
     def _logout(self, forced=False):
 

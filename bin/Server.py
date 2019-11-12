@@ -4,6 +4,7 @@ import sqlite3
 import hashlib
 from datetime import datetime
 from ClientConnection import ClientConnection
+from ClientSession import ClientSession
 
 
 # CLASS
@@ -41,9 +42,11 @@ class Server:
             (destination_socket, destination_address) = self.__socket.accept()
 
             print(
-                f' {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} - {destination_address[0]}')
+                f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} - {destination_address[0]}')
 
-            t = ClientConnection(destination_socket, self)
+            thread_session = ClientSession()
+
+            t = ClientConnection(destination_socket, self, thread_session)
             t.start()
 
             print(f'Currently logged: {len(self._sessions)}')
@@ -75,7 +78,6 @@ class Server:
             psw = self._db_cursor.fetchone()[0]
             if hash_password != psw:
                 raise Server.InvalidPasswordException()
-            self._sessions[thread_self.ident] = username
         except TypeError:
             raise Server.UserNotFoundException()
 

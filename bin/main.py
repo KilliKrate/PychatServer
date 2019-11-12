@@ -1,10 +1,9 @@
 # IMPORTS
-import socket
 from Server import Server
 
 
 # VARIABLES
-SERVER_ADDRESS = ('localhost', 2000)
+SERVER_ADDRESS = ('172.16.3.224', 2000)
 
 
 # METHODS

@@ -87,6 +87,9 @@ class Server:
     def send_private(self, thread_self, username, text):
         print(self._user_logged('username'))
 
-    def list_account(self):
-        self._db_cursor.execute('SELECT * FROM User')
-        return self._db_cursor.fetchall()
+    def user_list(self):
+        users = []
+        for session in self._sessions:
+            if 'username' in session.keys():
+                users.append(session['username'])
+        return users
